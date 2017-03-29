@@ -1,0 +1,93 @@
+---
+
+# Nextcloud version to install. Raise for upgrading.
+nextcloud_version: "11.0.2"
+
+# List of trusted domain names ('localhost' is added per default)
+nextcloud_trusted_domains: []
+
+# Path to the Nextcloud workdir holding Nextcloud instances
+nextcloud_workdir: "/var/www/nextcloud"
+# Path to the current Nextcloud instance
+nextcloud_instance: "{{ nextcloud_workdir }}/nextcloud-{{ nextcloud_version }}"
+# Path to the symlink pointing to the current Nextcloud instance
+nextcloud_symlink: "{{ nextcloud_workdir }}/nextcloud-current"
+nextcloud_webroot: "{{ nextcloud_symlink }}"
+
+# Path to the Nextcloud data directory
+nextcloud_data_dir: "/srv/nextcloud/data"
+
+# Nextcloud system, MySQL and web user settings
+nextcloud_http_user: www-data
+nextcloud_http_group: www-data
+nextcloud_mysql_user: nextcloud
+#nextcloud_mysql_password:
+nextcloud_mysql_user_host: "localhost"
+nextcloud_mysql_db: nextcloud
+nextcloud_mysql_host: "localhost"
+nextcloud_mysql_host_delegate: "{{ inventory_hostname }}"
+nextcloud_admin_user: admin
+#nextcloud_admin_password:
+
+# Make Nextcloud available over a webserver alias?
+nextcloud_www_alias: yes
+nextcloud_www_alias_name: "nextcloud"
+
+# List of Nextcloud Apps to install. Dictionary with the following
+# format (app1 is an app shipped within Nextcloud, app2 is an external
+# one that needs to be downloaded):
+# nextcloud_apps:
+#   app1: ""
+#   app2: "https://example.org/path/to/app2.tar.gz"
+nextcloud_apps: {}
+
+# Restore all enabled Apps after upgrade?
+nextcloud_restore_apps: yes
+
+# How to install Nextcloud (supported: 'git' or 'tar')
+nextcloud_src_type: "git"
+
+# The Git repository holding Nextcloud server
+nextcloud_repo: "https://github.com/nextcloud/server"
+# The URL for Nextcloud release tarballs
+nextcloud_tar_url: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2"
+
+# Backup Nextcloud instance before upgrade?
+nextcloud_backup: yes
+nextcloud_backup_dir: "/var/backups/nextcloud"
+
+# Dependencies (Debian packages) to install
+nextcloud_dependencies_general:
+  - php-pear
+  - python-mysqldb
+  - "{{ 'git' if nextcloud_src_type == 'git' else 'bzip2' }}"
+nextcloud_dependencies_jessie:
+  - php5-apcu
+  - php5-curl
+  - php5-gd
+  - php5-gmp
+  - php5-imagick
+  - php5-imap
+  - php5-intl
+  - php5-json
+  - php5-ldap
+  - php5-mcrypt
+  - php5-mysql
+nextcloud_dependencies_post_jessie:
+  - php-apcu
+  - php-curl
+  - php-gd
+  - php-gmp
+  - php-imagick
+  - php-imap
+  - php-intl
+  - php-json
+  - php-ldap
+  - php-mcrypt
+  - php-mysql
+  - php-bz2
+  - php-mbstring
+  - php-smbclient
+  - php-xml
+  - php-zip
+nextcloud_dependencies: "{{ nextcloud_dependencies_general + (nextcloud_dependencies_jessie if ansible_distribution_release == 'jessie' else nextcloud_dependencies_post_jessie) }}"

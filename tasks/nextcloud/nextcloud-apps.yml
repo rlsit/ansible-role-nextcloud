@@ -1,0 +1,64 @@
+---
+
+# Stolen from https://github.com/aalaesar/install_nextcloud/blob/master/tasks/nc_apps.yml
+
+- set_fact:
+    nextcloud_app_name: "{{nextcloud_item.key}}"
+    nextcloud_app_cfg: "{{nextcloud_item.value}}"
+
+- block:
+  - name: "Nextcloud apps: download archive in apps folder"
+    unarchive:
+      copy: no
+      src: "{{ nextcloud_app_cfg }}"
+      dest: "{{ nextcloud_instance }}/apps/"
+      owner: "{{ nextcloud_http_user }}"
+      group: "{{ nextcloud_http_group }}"
+      creates: "{{ nextcloud_instance }}/apps/{{ nextcloud_app_name }}"
+    when: nextcloud_app_cfg != ""
+
+  - name: "Nextcloud apps: enable the app"
+    become: true
+    become_user: "{{ nextcloud_http_user }}"
+    command: php occ app:enable "{{ nextcloud_app_name }}"
+    args:
+      chdir: "{{ nextcloud_instance }}"
+  when: nextcloud_app_cfg is string
+
+- block:
+  - assert:
+      that:
+        - (nextcloud_app_cfg.source is defined) and (nextcloud_app_cfg.source is string)
+      msg: "{{ nextcloud_app_name }} is not well declared"
+
+  - name: "Nextcloud apps: download archive in apps folder"
+    unarchive:
+      src: "{{ nextcloud_app_cfg.source }}"
+      dest: "{{ nextcloud_instance }}/apps/"
+      remote_src: yes
+      owner: "{{ nextcloud_http_user }}"
+      group: "{{ nextcloud_http_group }}"
+      creates: "{{ nextcloud_instance }}/apps/{{ nextcloud_app_name }}"
+    when: nextcloud_app_cfg.source != ""
+
+  - name: "Nextcloud apps: enable the app"
+    become: true
+    become_user: "{{ nextcloud_http_user }}"
+    command: php occ app:enable "{{ nextcloud_app_name }}"
+    args:
+      chdir: "{{ nextcloud_instance }}"
+  - block:
+    - name: "Nextcloud apps: configure the app"
+      become: true
+      become_user: "{{ nextcloud_http_user }}"
+      command: >
+        php occ config:app:set {{ nextcloud_app_name }}
+        {{ nextcloud_app_item.key }}
+        --value={{ nextcloud_app_item.value }}
+      args:
+        chdir: "{{ nextcloud_instance }}"
+      with_dict: "{{nextcloud_app_cfg.conf | default({})}}"
+      loop_control:
+        loop_var: nextcloud_app_item
+    when: nextcloud_app_cfg.conf is defined
+  when: (nextcloud_app_cfg is mapping)

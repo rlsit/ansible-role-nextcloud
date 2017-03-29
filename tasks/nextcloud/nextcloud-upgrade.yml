@@ -1,0 +1,75 @@
+---
+
+- name: "Nextcloud upgrade: set maintenance mode via occ commandline"
+  become: true
+  become_user: "{{ nextcloud_http_user }}"
+  command: php occ maintenance:mode --on
+  args:
+    chdir: "{{ nextcloud_webroot_old }}"
+
+- name: "Nextcloud upgrade: change symlink to maintenance page"
+  file:
+    src: "nextcloud-maintenance"
+    dest: "{{ nextcloud_symlink }}"
+    state: link
+    owner: root
+    group: root
+
+- name: "Nextcloud upgrade: copy config.php over from old instance"
+  copy:
+    src: "{{ nextcloud_webroot_old }}/config/config.php"
+    dest: "{{ nextcloud_dl_tmp_dir }}/nextcloud/config/config.php"
+    remote_src: yes
+    owner: "{{ nextcloud_http_user }}"
+    group: "{{ nextcloud_http_group }}"
+    mode: 0640
+
+# TODO: copy over data directory from nextcloud_webroot_old if it was there
+# Problems: * data directory can be huge. copying it twice during upgrade
+#             should be avoided.
+#           * nextcloud_data_dir is wrong source. nextcloud_webroot_old/..?
+#- name: "Nextcloud upgrade: copy over data directory when inside nextcloud_webroot"
+#  command: cp -a {{ nextcloud_data_dir }}/. {{ nextcloud_data_dir_tmp }}/
+#  when: nextcloud_register_data_inside
+
+- block:
+  - name: "Nextcloud upgrade: register apps from old instance"
+    command: find . -maxdepth 1 -mindepth 1 -type d
+    args:
+      chdir: "{{ nextcloud_webroot_old }}/apps"
+    changed_when: false
+    register: nextcloud_register_apps_old
+  - name: "Nextcloud upgrade: register apps from new instance"
+    command: find . -maxdepth 1 -mindepth 1 -type d
+    args:
+      chdir: "{{ nextcloud_dl_tmp_dir }}/nextcloud/apps"
+    changed_when: false
+    register: nextcloud_register_apps_new
+  - name: "Nextcloud upgrade: copy missing apps from old to new instance"
+    command: >
+      cp -a
+      {{ nextcloud_webroot_old }}/apps/{{ nextcloud_upgrade_item }}
+      {{ nextcloud_dl_tmp_dir }}/nextcloud/apps/
+    loop_control:
+      loop_var: nextcloud_upgrade_item
+    with_items: "{{ nextcloud_register_apps_old.stdout_lines | difference(nextcloud_register_apps_new.stdout_lines) }}"
+    when: (nextcloud_register_apps_old.stdout_lines|d() and nextcloud_register_apps_new.stdout_lines|d())
+  when: nextcloud_restore_apps
+
+- name: "Nextcloud upgrade: upgrade via occ commandline"
+  become: true
+  become_user: "{{ nextcloud_http_user }}"
+  command: >
+      php occ upgrade
+      --no-app-disable
+      --no-interaction
+      --no-warnings
+  args:
+    chdir: "{{ nextcloud_dl_tmp_dir }}/nextcloud"
+
+- name: "Nextcloud upgrade: unset maintenance mode via occ commandline"
+  become: true
+  become_user: "{{ nextcloud_http_user }}"
+  command: php occ maintenance:mode --off
+  args:
+    chdir: "{{ nextcloud_dl_tmp_dir }}/nextcloud"

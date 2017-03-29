@@ -1,0 +1,112 @@
+---
+
+- name: gather Nextcloud instance facts
+  include: nextcloud/nextcloud-facts.yml
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+    - role:nextcloud:maintenance-page
+    - role:nextcloud:database
+    - role:nextcloud:backup
+    - role:nextcloud:apps
+
+- name: copy over Nextcloud maintenance page
+  include: nextcloud/nextcloud-maintenance-page.yml
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+    - role:nextcloud:maintenance-page
+
+- name: download new Nextcloud version if required
+  include: nextcloud/nextcloud-download.yml
+  when: (nextcloud_register_do_install or nextcloud_register_do_upgrade)
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+
+- name: setup Nextcloud MySQL database
+  include: nextcloud/nextcloud-mysql.yml
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+    - role:nextcloud:database
+
+- name: configure Nextcloud
+  include: nextcloud/nextcloud-configure.yml
+  #when: (nextcloud_register_do_install and (not nextcloud_register_config.stat.exists or nextcloud_register_configured.rc|d() != 0))
+  when: (nextcloud_register_do_install and (not nextcloud_register_config.stat.exists))
+  tags:
+    - role:nextcloud:install
+
+- name: backup Nextcloud
+  include: nextcloud/nextcloud-backup.yml
+  when: (nextcloud_backup and nextcloud_register_do_upgrade)
+  tags:
+    - role:nextcloud:upgrade
+    - role:nextcloud:backup
+
+- name: upgrade Nextcloud
+  include: nextcloud/nextcloud-upgrade.yml
+  when: nextcloud_register_do_upgrade
+  tags:
+    - role:nextcloud:upgrade
+
+- name: harden Nextcloud installation
+  include: nextcloud/nextcloud-harden.yml
+  when: (nextcloud_register_do_install or nextcloud_register_do_upgrade)
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+
+- name: finalize Nextcloud instance
+  include: nextcloud/nextcloud-finalize.yml
+  when: (nextcloud_register_do_install or nextcloud_register_do_upgrade)
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+
+- block:
+  - name: register available Nextcloud apps
+    become: true
+    become_user: "{{ nextcloud_http_user }}"
+    command: php occ app:list --output=json_pretty --no-warnings
+    args:
+      chdir: "{{ nextcloud_instance }}"
+    changed_when: false
+    check_mode: no
+    register: nextcloud_register_app_list
+  - name: convert Nextcloud app list to yaml"
+    set_fact:
+      nextcloud_register_apps_installed: "{{ nextcloud_register_app_list.stdout | from_json }}"
+  - name: install/enable Nextcloud apps
+    include: nextcloud/nextcloud-apps.yml
+    when: (nextcloud_item.key not in nextcloud_register_apps_installed.enabled) and ((nextcloud_item.value != "") or (nextcloud_item.key in nextcloud_register_apps_installed.disabled))
+    loop_control:
+      loop_var: nextcloud_item
+    with_dict: "{{ nextcloud_apps }}"
+  when: (nextcloud_apps|d() is mapping)
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+    - role:nextcloud:apps
+
+- name: create Nextcloud cronjob
+  cron:
+    name: "Nextcloud cronjob"
+    minute: "*/15"
+    user: "{{ nextcloud_http_user }}"
+    job: "php -f {{ nextcloud_instance }}/cron.php"
+    cron_file: nextcloud
+  when: (nextcloud_register_do_install or nextcloud_register_do_upgrade)
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+
+- name: create Nextcloud logrotate rule
+  template:
+    src: nextcloud/nextcloud.logrotate.j2
+    dest: /etc/logrotate.d/nextcloud
+  when: (nextcloud_register_do_install or nextcloud_register_do_upgrade)
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade

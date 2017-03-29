@@ -1,0 +1,50 @@
+---
+
+- name: "Nextcloud download: create temporary download directory"
+  file:
+    name: "{{ nextcloud_dl_tmp_dir }}"
+    state: directory
+
+- block:
+  - name: "Nextcloud download: clone version branch from git repo"
+    git:
+      repo: "{{ nextcloud_repo }}"
+      dest: "{{ nextcloud_dl_tmp_dir }}/nextcloud"
+      version: "v{{ nextcloud_version }}"
+    when: nextcloud_src_type == "git"
+#  - name: "Nextcloud download: remove unneeded files and dirs from clone"
+#    file:
+#      path: "{{ nextcloud_dl_tmp_dir }}/{{ nextcloud_download_item }}"
+#      state: absent
+#    loop_control:
+#      loop_var: nextcloud_download_item
+#    with_items:
+#      - Dockerfile
+#      - index-test.php
+#      - installer
+#    when: nextcloud_src_type == "git"
+  - name: "Nextcloud download: fetch and unpack version tarball"
+    unarchive:
+      src: "{{ nextcloud_tar_url }}"
+      dest: "{{ nextcloud_dl_tmp_dir }}"
+      remote_src: yes
+      owner: "{{ nextcloud_http_user }}"
+      group: "{{ nextcloud_http_group }}"
+    when: nextcloud_src_type == "tar"
+
+- name: "Nextcloud download: adjust owner for installation/upgrade"
+  file:
+    path: "{{ nextcloud_dl_tmp_dir }}"
+    state: directory
+    owner: "{{ nextcloud_http_user }}"
+    group: "{{ nextcloud_http_group }}"
+    recurse: yes
+
+- name: "Nextcloud download: check if new version has been downloaded"
+  stat:
+    path: "{{ nextcloud_dl_tmp_dir }}/nextcloud/version.php"
+  register: nextcloud_register_dl_post
+
+- fail:
+    msg: "Error: Failed to fetch new Nextcloud version"
+  when: nextcloud_register_dl_post.stat.exists == False
