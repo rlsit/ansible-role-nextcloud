@@ -22,15 +22,19 @@ done better in separate roles.
 On the other hand, PHP dependencies particularly required for Nextcloud are
 installed on the target system.
 
+Some modules used in this role are new to Ansible 2.2 and it's tested with
+Ansible 2.2 only.
+
 In other words, the following preliminaries need to be met:
 
+* Ansible 2.2 or new
 * A MariaDB/MySQL server with admin permissions (may be remote)
 * A webserver (e.g. Apache2/Nginx) with basic PHP support (needs to be local
   to the target system)
 * A mail server if you want the Nextcloud instance to send out mails (may be
   remote)
 * The Nextcloud `data` directory needs to be located outside
-  `nextcloud_work_dir`.
+  `nextcloud_work_dir`
 
 # Usage example
 
