@@ -27,7 +27,7 @@ Ansible 2.2 only.
 
 In other words, the following preliminaries need to be met:
 
-* Ansible 2.2 or new
+* Ansible 2.2 or newer
 * A MariaDB/MySQL server with admin permissions (may be remote)
 * A webserver (e.g. Apache2/Nginx) with basic PHP support (needs to be local
   to the target system)
