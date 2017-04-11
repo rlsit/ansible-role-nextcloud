@@ -96,7 +96,7 @@ Alias /{{ nextcloud_www_alias_name|d('nextcloud') }} {{ nextcloud_webroot }}
 
 # License
 
-This Ansible role is licensed under the GNU GPLv2 or later.
+This Ansible role is licensed under the Modified BSD License.
 
 # Author
 
