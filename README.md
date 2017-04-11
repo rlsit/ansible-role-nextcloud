@@ -34,9 +34,9 @@ In other words, the following preliminaries need to be met:
 
 # Usage example
 
-1. Integrate the role in your playbook:  
-     
-   ```
+* Integrate the role in your playbook:  
+    
+  ```
 - hosts: cloud.example.org
   roles:
     - nextcloud
@@ -44,10 +44,10 @@ In other words, the following preliminaries need to be met:
     - nextcloud
 ```
 
-2. Configure role variables in `host_vars` for the target system (see
-   `defaults/main.yml` for a list of supported config options):  
-     
-   ```
+* Configure role variables in `host_vars` for the target system (see
+  `defaults/main.yml` for a list of supported config options):  
+    
+  ```
 # Nextcloud settings
 
 nextcloud_version: 11.0.2
@@ -65,14 +65,14 @@ nextcloud_mysql_password: "******"
 nextcloud_admin_password: "******"
 ```
 
-2. Deploy Nextcloud to the target system:  
-     
-   `ansible-playbook site.yml -t nextcloud -l cloud.example.org --diff`
+* Deploy Nextcloud to the target system:  
+    
+  `ansible-playbook site.yml -t nextcloud -l cloud.example.org --diff`
 
-3. Configure the VirtualHost of your webserver. The following is an example snippet for
-   a jinja2 template:  
-     
-   ```
+* Configure the VirtualHost of your webserver. The following is an example snippet for
+  a jinja2 template:  
+    
+  ```
 {% set nextcloud_webroot = nextcloud_webroot|d(nextcloud_workdir|d() + '/nextcloud-current') %}
 {% if nextcloud_www_alias|d(true) %}
 Alias /{{ nextcloud_www_alias_name|d('nextcloud') }} {{ nextcloud_webroot }}
