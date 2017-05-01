@@ -3,8 +3,8 @@
 # Stolen from https://github.com/aalaesar/install_nextcloud/blob/master/tasks/nc_apps.yml
 
 - set_fact:
-    nextcloud_app_name: "{{nextcloud_item.key}}"
-    nextcloud_app_cfg: "{{nextcloud_item.value}}"
+    nextcloud_app_name: "{{ nextcloud_item.key }}"
+    nextcloud_app_cfg: "{{ nextcloud_item.value }}"
 
 - block:
   - name: "Nextcloud apps: download archive in apps folder"
@@ -57,7 +57,7 @@
         --value={{ nextcloud_app_item.value }}
       args:
         chdir: "{{ nextcloud_instance }}"
-      with_dict: "{{nextcloud_app_cfg.conf | default({})}}"
+      with_dict: "{{ nextcloud_app_cfg.conf|d({}) }}"
       loop_control:
         loop_var: nextcloud_app_item
     when: nextcloud_app_cfg.conf is defined

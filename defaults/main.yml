@@ -41,6 +41,11 @@ nextcloud_www_alias_name: "nextcloud"
 #   app2: "https://example.org/path/to/app2.tar.gz"
 nextcloud_apps: {}
 
+# List of Nextcloud Apps to disable.
+# nextcloud_apps_disable:
+#   - app1
+#nextcloud_apps_disable:
+
 # Restore all enabled Apps after upgrade?
 nextcloud_restore_apps: yes
 

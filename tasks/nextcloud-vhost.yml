@@ -75,7 +75,7 @@
     changed_when: false
     check_mode: no
     register: nextcloud_register_app_list
-  - name: convert Nextcloud app list to yaml"
+  - name: convert Nextcloud app list to yaml
     set_fact:
       nextcloud_register_apps_installed: "{{ nextcloud_register_app_list.stdout | from_json }}"
   - name: install/enable Nextcloud apps
@@ -85,6 +85,21 @@
       loop_var: nextcloud_item
     with_dict: "{{ nextcloud_apps }}"
   when: (nextcloud_apps|d() is mapping)
+  tags:
+    - role:nextcloud:install
+    - role:nextcloud:upgrade
+    - role:nextcloud:apps
+
+- name: disable Nextcloud apps
+  become: true
+  become_user: "{{ nextcloud_http_user }}"
+  command: php occ app:disable "{{ nextcloud_item }}"
+  args:
+    chdir: "{{ nextcloud_instance }}"
+  loop_control:
+    loop_var: nextcloud_item
+  with_items: "{{ nextcloud_apps_disabled }}"
+  when: (nextcloud_apps_disabled|d() and nextcloud_item not in nextcloud_register_apps_installed.disabled)
   tags:
     - role:nextcloud:install
     - role:nextcloud:upgrade
