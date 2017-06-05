@@ -45,6 +45,9 @@
       chdir: "{{ nextcloud_dl_tmp_dir }}/nextcloud/apps"
     changed_when: false
     register: nextcloud_register_apps_new
+  # * Copy over apps from the old Nextcloud instance that are missing in
+  #   the new instance and are listed with external install path in
+  #   'nextcloud_apps'
   - name: "Nextcloud upgrade: copy missing apps from old to new instance"
     command: >
       cp -a
@@ -53,7 +56,10 @@
     loop_control:
       loop_var: nextcloud_upgrade_item
     with_items: "{{ nextcloud_register_apps_old.stdout_lines | difference(nextcloud_register_apps_new.stdout_lines) }}"
-    when: (nextcloud_register_apps_old.stdout_lines|d() and nextcloud_register_apps_new.stdout_lines|d())
+    when:
+      - nextcloud_register_apps_old.stdout_lines|d() and nextcloud_register_apps_new.stdout_lines|d()
+      - nextcloud_upgrade_item|basename in nextcloud_apps
+      - nextcloud_apps[nextcloud_upgrade_item|basename] != ""
   when: nextcloud_restore_apps
 
 - name: "Nextcloud upgrade: upgrade via occ commandline"
