@@ -78,9 +78,15 @@
   - name: convert Nextcloud app list to yaml
     set_fact:
       nextcloud_register_apps_installed: "{{ nextcloud_register_app_list.stdout | from_json }}"
+  # * Install all apps from 'nextcloud_apps' that have an install path set
+  #   and are not enabled yet
+  # * Enable all remaining apps from 'nextcloud_apps' that are disabled but
+  #   available locally
   - name: install/enable Nextcloud apps
     include: nextcloud/nextcloud-apps.yml
-    when: (nextcloud_item.key not in nextcloud_register_apps_installed.enabled) and ((nextcloud_item.value != "") or (nextcloud_item.key in nextcloud_register_apps_installed.disabled))
+    when: (nextcloud_item.key not in nextcloud_register_apps_installed.enabled) and
+          ( (nextcloud_item.value != "") or
+            (nextcloud_item.key in nextcloud_register_apps_installed.disabled) )
     loop_control:
       loop_var: nextcloud_item
     with_dict: "{{ nextcloud_apps }}"
