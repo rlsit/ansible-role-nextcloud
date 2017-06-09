@@ -54,7 +54,7 @@ In other words, the following preliminaries need to be met:
   ```
 # Nextcloud settings
 
-nextcloud_version: 11.0.2
+nextcloud_version: 12.0.0
 
 nextcloud_apps:
   admin_audit: ""
