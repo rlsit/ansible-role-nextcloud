@@ -25,6 +25,7 @@
   command: "cp -a {{ nextcloud_data_dir }} {{ nextcloud_backup_data }}"
   args:
     creates: "{{ nextcloud_backup_data }}"
+  when: nextcloud_backup_data|d(False)
 
 - name: "Nextcloud backup: Verify backup"
   stat:

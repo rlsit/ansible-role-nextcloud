@@ -59,6 +59,7 @@ nextcloud_tar_url: "https://download.nextcloud.com/server/releases/nextcloud-{{ 
 
 # Backup Nextcloud instance before upgrade?
 nextcloud_backup: yes
+nextcloud_backup_data: no
 nextcloud_backup_dir: "/var/backups/nextcloud"
 
 # Dependencies (Debian packages) to install
