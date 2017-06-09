@@ -6,10 +6,8 @@
   tags:
     - role:nextcloud:install
     - role:nextcloud:upgrade
-  when: "'nextcloud' in apache2_vhosts|d()|json_query('[*].[webapps][][]')"
 
 - include: nextcloud-vhost.yml
   loop_control:
     loop_var: vhost_item
   with_flattened: "{{ apache2_vhosts }}"
-  when: "'nextcloud' in apache2_vhosts|d()|json_query('[*].[webapps][][]')"
