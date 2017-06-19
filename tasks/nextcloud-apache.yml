@@ -1,0 +1,10 @@
+---
+
+- name: copy PHP opcache include config
+  template:
+    src: php/apache2/conf.d/nextcloud-opcache.ini
+    dest: "/etc/php{{ '5' if ansible_distribution_release == 'jessie' else '/7.0' }}/apache2/conf.d/nextcloud-opcache.ini"
+    owner: root
+    group: root
+    mode: 0644
+  notify: test and restart apache2

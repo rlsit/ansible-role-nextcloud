@@ -11,3 +11,7 @@
   loop_control:
     loop_var: vhost_item
   with_flattened: "{{ apache2_vhosts }}"
+
+- include: nextloud-apache.yml
+  tags:
+    - role:nextcloud:apache
