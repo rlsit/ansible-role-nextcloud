@@ -96,4 +96,4 @@ nextcloud_dependencies_post_jessie:
   - php-smbclient
   - php-xml
   - php-zip
-nextcloud_dependencies: "{{ nextcloud_dependencies_general + (nextcloud_dependencies_jessie if ansible_distribution_release == 'jessie' else nextcloud_dependencies_post_jessie) }}"
+nextcloud_dependencies: "{{ nextcloud_dependencies_general + (nextcloud_dependencies_jessie if ansible_distribution_major_version|int <= 8 else nextcloud_dependencies_post_jessie) }}"
