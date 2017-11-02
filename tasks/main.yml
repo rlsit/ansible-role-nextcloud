@@ -14,6 +14,8 @@
   when: apache2_vhosts|d()
 
 - include: nextcloud-vhost.yml
+  vars:
+    - vhost_item: {}
   when: not apache2_vhosts|d()
 
 - include: nextcloud-apache-php.yml
