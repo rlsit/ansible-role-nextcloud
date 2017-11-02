@@ -1,6 +1,6 @@
 # Ansible role to install and maintain Nextcloud setups
 
-[![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-letsencrypt-blue.svg)](https://galaxy.ansible.com/systemli/letsencrypt/)
+[![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-nextcloud-blue.svg)](https://galaxy.ansible.com/mejo-/nextcloud/)
 
 This role is meant to deploy and upgrade Nextcloud instances to Debian
 systems.
