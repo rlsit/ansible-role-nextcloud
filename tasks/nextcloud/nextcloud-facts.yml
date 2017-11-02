@@ -1,5 +1,7 @@
 ---
 
+# TODO: Add support for nextcloud_version='latest'
+
 - name: "Nextcloud facts: set instance installation directory"
   set_fact:
     nextcloud_webroot: "{{ vhost_item.nextcloud_webroot|d(nextcloud_webroot) }}"
