@@ -1,7 +1,9 @@
 # Ansible role to install and maintain Nextcloud setups
 
-The purpose is to make installing and upgrading Nextcloud instances
-straightforward.
+[![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-letsencrypt-blue.svg)](https://galaxy.ansible.com/systemli/letsencrypt/)
+
+This role is meant to deploy and upgrade Nextcloud instances to Debian
+systems.
 
 # How it works
 
@@ -19,13 +21,12 @@ The role takes care of installing and upgrading Nextcloud and its apps. It
 doesn't install or configure MariaDB/MySQL, mail or web service. This is
 done better in separate roles.
 
-On the other hand, PHP dependencies particularly required for Nextcloud are
-installed on the target system.
+Only PHP dependencies required for Nextcloud are installed by that role.
 
 Some modules used in this role are new to Ansible 2.2 and it's tested with
-Ansible 2.2 only.
+Ansible 2.2, 2.3 and 2.4.
 
-In other words, the following preliminaries need to be met:
+The following preliminaries need to be met:
 
 * Ansible 2.2 or newer
 * A MariaDB/MySQL server with admin permissions (may be remote)
@@ -49,18 +50,17 @@ In other words, the following preliminaries need to be met:
 ```
 
 * Configure role variables in `host_vars` for the target system (see
-  `defaults/main.yml` for a list of supported config options):  
+  `defaults/main.yml` for a list of supported config variables):  
     
   ```
 # Nextcloud settings
 
-nextcloud_version: 12.0.0
+nextcloud_version: 12.0.3
 
 nextcloud_apps:
   admin_audit: ""
   calendar: "https://github.com/nextcloud/calendar/releases/download/v1.5.2/calendar.tar.gz"
   contacts: "https://github.com/nextcloud/contacts/releases/download/v1.5.3/contacts.tar.gz"
-nextcloud_src_type: tar
 nextcloud_workdir: "/var/www/cloud.example.org/nextcloud"
 nextcloud_data_dir: "/srv/nextcloud/data"
 nextcloud_trusted_domains:
@@ -77,7 +77,7 @@ nextcloud_admin_password: "******"
   a jinja2 template:  
     
   ```
-{% set nextcloud_webroot = nextcloud_webroot|d(nextcloud_workdir|d() + '/nextcloud-current') %}
+{% set nextcloud_webroot = nextcloud_workdir|d() + '/nextcloud-current' %}
 {% if nextcloud_www_alias|d(true) %}
 Alias /{{ nextcloud_www_alias_name|d('nextcloud') }} {{ nextcloud_webroot }}
 {% endif %}
@@ -96,7 +96,7 @@ Alias /{{ nextcloud_www_alias_name|d('nextcloud') }} {{ nextcloud_webroot }}
 
 # License
 
-This Ansible role is licensed under the GNU GPLv2 or later.
+This Ansible role is licensed under the GNU GPLv3 or later.
 
 # Author
 
