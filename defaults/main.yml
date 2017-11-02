@@ -17,6 +17,9 @@ nextcloud_webroot: "{{ nextcloud_symlink }}"
 # Path to the Nextcloud data directory
 nextcloud_data_dir: "/srv/nextcloud/data"
 
+# Configure the Apache2 php.ini automatically?
+nextcloud_apache_php: yes
+
 # Nextcloud system, MySQL and web user settings
 nextcloud_http_user: www-data
 nextcloud_http_group: www-data

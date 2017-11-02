@@ -14,6 +14,8 @@ systems.
 * A symlink `{{ nextcloud_work_dir }}/nextcloud-current` is installed that
   points to the current and active Nextcloud installation (or to the
   maintenance page during the upgrade).
+* If a list variable `apache2_vhosts` is set, then the role loops over this
+  list and deploys nextcloud on each vhost.
 
 # Preliminaries
 

@@ -11,7 +11,12 @@
   loop_control:
     loop_var: vhost_item
   with_flattened: "{{ apache2_vhosts }}"
+  when: apache2_vhosts|d()
 
-- include: nextcloud-apache.yml
+- include: nextcloud-vhost.yml
+  when: not apache2_vhosts|d()
+
+- include: nextcloud-apache-php.yml
+  when: nextcloud_apache_php|d()
   tags:
     - role:nextcloud:apache
