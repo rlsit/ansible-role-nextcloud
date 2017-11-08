@@ -75,9 +75,22 @@
     changed_when: false
     check_mode: no
     register: nextcloud_register_app_list
+
   - name: convert Nextcloud app list to yaml
     set_fact:
       nextcloud_register_apps_installed: "{{ nextcloud_register_app_list.stdout | from_json }}"
+
+  - name: Remove old Nextcloud app version
+    include: nextcloud/nextcloud-app-remove.yml
+    when: nextcloud_item.value.version is defined and
+      nextcloud_register_apps_installed['enabled'][nextcloud_item.key] is defined and
+      nextcloud_item.value.version | version_compare( nextcloud_register_apps_installed['enabled'][nextcloud_item.key] , '!=' )
+    loop_control:
+      loop_var: nextcloud_item
+    with_dict: "{{ nextcloud_apps }}"
+    tags:
+      - role:nextcloud:apps
+
   # * Install all apps from 'nextcloud_apps' that have an install path set
   #   and are not enabled yet
   # * Enable all remaining apps from 'nextcloud_apps' that are disabled but
