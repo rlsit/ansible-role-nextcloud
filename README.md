@@ -58,17 +58,20 @@ The following preliminaries need to be met:
 # Nextcloud settings
 
 nextcloud_version: 12.0.3
-
-nextcloud_apps:
-  admin_audit: ""
-  calendar: "https://github.com/nextcloud/calendar/releases/download/v1.5.2/calendar.tar.gz"
-  contacts: "https://github.com/nextcloud/contacts/releases/download/v1.5.3/contacts.tar.gz"
 nextcloud_workdir: "/var/www/cloud.example.org/nextcloud"
 nextcloud_data_dir: "/srv/nextcloud/data"
 nextcloud_trusted_domains:
   - cloud.example.org
 nextcloud_mysql_password: "******"
 nextcloud_admin_password: "******"
+
+nextcloud_apps:
+  admin_audit: ""
+  calendar:
+    source: https://github.com/nextcloud/calendar/releases/download/v1.5.6/calendar.tar.gz
+    version: 1.5.6
+  contacts:
+    source: https://github.com/nextcloud/contacts/releases/download/v2.0.1/contacts.tar.gz
 ```
 
 * Deploy Nextcloud to the target system:  

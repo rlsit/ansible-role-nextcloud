@@ -10,11 +10,11 @@
 - name: "Nextcloud facts: determine whether instance is already installed"
   stat:
     path: "{{ nextcloud_webroot }}/version.php"
-  register: nextcloud_register_installed
+  register: nextcloud_reg_installed
 
 - name: "Nextcloud facts: determine whether instance is to be installed"
   set_fact:
-    nextcloud_register_do_install: "{{ nextcloud_register_installed.stat.exists|ternary('no', 'yes') }}"
+    nextcloud_reg_do_install: "{{ nextcloud_reg_installed.stat.exists|ternary('no', 'yes') }}"
 
 - name: "Nextcloud facts: get instance status if already installed"
   become: true
@@ -22,39 +22,39 @@
   command: php occ status --output=json
   args:
     chdir: "{{ nextcloud_webroot }}"
-  register: nextcloud_register_status_json
+  register: nextcloud_reg_status_json
   changed_when: false
   check_mode: no
-  when: (not nextcloud_register_do_install)
+  when: not nextcloud_reg_do_install
 
 # Safety check: 'occ status' output not plain json if in maintenance mode
 - fail:
     msg: "Error: Nextcloud already in maintenance mode or other error"
-  when: ("Nextcloud is in maintenance mode" in nextcloud_register_status_json.stdout|d()) or (nextcloud_register_status_json.rc|d(0) != 0)
+  when: ("Nextcloud is in maintenance mode" in nextcloud_reg_status_json.stdout|d()) or (nextcloud_reg_status_json.rc|d(0) != 0)
 
 - name: "Nextcloud facts: parse instance status if already installed"
   set_fact:
-    nextcloud_register_version: "{{ (nextcloud_register_status_json.stdout|d())|from_json|json_query('[versionstring]')|join() if nextcloud_register_status_json.stdout|d() else {} }}"
+    nextcloud_reg_version: "{{ (nextcloud_reg_status_json.stdout|d())|from_json|json_query('[versionstring]')|join() if nextcloud_reg_status_json.stdout|d() else {} }}"
 
-- name: "Nextcloud facts: set nextcloud_webroot_old based on nextcloud_register_version"
+- name: "Nextcloud facts: set nextcloud_webroot_old based on nextcloud_reg_version"
   set_fact:
-    nextcloud_webroot_old: "{{ nextcloud_webroot.rsplit('/', 1)[-2] }}/nextcloud-{{ nextcloud_register_version }}"
+    nextcloud_webroot_old: "{{ nextcloud_webroot.rsplit('/', 1)[-2] }}/nextcloud-{{ nextcloud_reg_version }}"
 
 - name: "Nextcloud facts: determine whether installation or upgrade"
   set_fact:
-    nextcloud_register_do_upgrade: "{{ ((not nextcloud_register_do_install) and nextcloud_register_version|d() and nextcloud_register_version != nextcloud_version)|ternary('yes', 'no') }}"
+    nextcloud_reg_do_upgrade: "{{ ((not nextcloud_reg_do_install) and nextcloud_reg_version|d() and nextcloud_reg_version != nextcloud_version)|ternary('yes', 'no') }}"
 
 - name: "Nextcloud facts: determine if config.php exists"
   stat:
     path: "{{ nextcloud_symlink }}/config/config.php"
-  register: nextcloud_register_config
+  register: nextcloud_reg_config
 
 #- name: "Nextcloud facts: determine if instance is configured"
 #  stat:
 #    path: grep -q "{{ nextcloud_trusted_domains|first }}" {{ nextcloud_symlink }}/config/config.php
 #  failed_when: False
 #  changed_when: False
-#  register: nextcloud_register_configured
+#  register: nextcloud_reg_configured
 
 - name: "Nextcloud facts: determine whether data dir is in nextcloud_webroot"
   set_fact:
@@ -67,11 +67,11 @@
 
 - name: "Nextcloud facts: set ..._data_inside if data dir in nextcloud_webroot"
   set_fact:
-    nextcloud_register_data_inside: "{{ (nextcloud_data_dir == nextcloud_data_dir_tmp)|ternary('no', 'yes') }}"
+    nextcloud_reg_data_inside: "{{ (nextcloud_data_dir == nextcloud_data_dir_tmp)|ternary('no', 'yes') }}"
 
 # TODO: Implement function to copy over data directory if it's inside
 #       nextcloud_webroot(_old)?. nextcloud-harden has everything in place,
 #       only nextcloud-upgrade is missing some logic. See TODO notes there.
 - fail:
     msg: "Error: Data directory ({{ nextcloud_data_dir }}) is inside nextcloud_webroot ({{ nextcloud_webroot }}). Not supported yet."
-  when: nextcloud_register_data_inside
+  when: nextcloud_reg_data_inside

@@ -9,7 +9,7 @@
 
 - fail:
     msg: "Error: Nextcloud instance webroot already exists: {{ nextcloud_instance }}"
-  when: (not nextcloud_instance_created.changed)
+  when: not nextcloud_instance_created.changed
 
 - name: "Nextcloud finalize: move new Nextcloud to nextcloud_instance"
   command: "cp -a {{ nextcloud_dl_tmp_dir }}/nextcloud/. {{ nextcloud_instance }}/"

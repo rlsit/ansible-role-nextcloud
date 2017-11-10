@@ -1,7 +1,7 @@
 ---
 
 # Nextcloud version to install. Raise for upgrading.
-nextcloud_version: "12.0.0"
+nextcloud_version: "12.0.3"
 
 # List of trusted domain names ('localhost' is added per default)
 nextcloud_trusted_domains: []
@@ -36,18 +36,28 @@ nextcloud_admin_user: admin
 nextcloud_www_alias: yes
 nextcloud_www_alias_name: "nextcloud"
 
-# List of Nextcloud Apps to install. Dictionary with the following
-# format (app1 is an app shipped within Nextcloud, app2 is an external
-# one that needs to be downloaded):
+# List of Nextcloud Apps to install
+#
+# A dict with app names as keys and another dict of settings as values
+# * for internal apps the dict can be empty ("")
+# * for external apps the dict supports keys 'source', 'version' and 'conf'
+#   * 'source': the app will be downloaded from this URL
+#   * 'version': optional pinning of the app, enables app upgrades via Ansible
+#   * 'conf': optional dict with app configuration settings
+#
 # nextcloud_apps:
-#   app1: ""
-#   app2: "https://example.org/path/to/app2.tar.gz"
+#   app_internal: ""
+#   app_external:
+#     source: "https://example.org/path/to/app_external.tar.gz"
+#     version: "1.2.3"
+#     conf:
+#       setting1: value1
+#       setting2: value2
+#
 nextcloud_apps: {}
 
 # List of Nextcloud Apps to disable.
-# nextcloud_apps_disable:
-#   - app1
-#nextcloud_apps_disable:
+nextcloud_apps_disable: []
 
 # Restore all enabled Apps after upgrade?
 nextcloud_restore_apps: yes

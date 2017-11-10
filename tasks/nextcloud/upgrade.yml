@@ -30,7 +30,7 @@
 #           * nextcloud_data_dir is wrong source. nextcloud_webroot_old/..?
 #- name: "Nextcloud upgrade: copy over data directory when inside nextcloud_webroot"
 #  command: cp -a {{ nextcloud_data_dir }}/. {{ nextcloud_data_dir_tmp }}/
-#  when: nextcloud_register_data_inside
+#  when: nextcloud_reg_data_inside
 
 - block:
   - name: "Nextcloud upgrade: register apps from old instance"
@@ -38,13 +38,13 @@
     args:
       chdir: "{{ nextcloud_webroot_old }}/apps"
     changed_when: false
-    register: nextcloud_register_apps_old
+    register: nextcloud_reg_apps_old
   - name: "Nextcloud upgrade: register apps from new instance"
     command: find . -maxdepth 1 -mindepth 1 -type d
     args:
       chdir: "{{ nextcloud_dl_tmp_dir }}/nextcloud/apps"
     changed_when: false
-    register: nextcloud_register_apps_new
+    register: nextcloud_reg_apps_new
   # * Copy over apps from the old Nextcloud instance that are missing in
   #   the new instance and are listed with external install path in
   #   'nextcloud_apps'
@@ -55,9 +55,10 @@
       {{ nextcloud_dl_tmp_dir }}/nextcloud/apps/
     loop_control:
       loop_var: nextcloud_upgrade_item
-    with_items: "{{ nextcloud_register_apps_old.stdout_lines | difference(nextcloud_register_apps_new.stdout_lines) }}"
+    with_items: "{{ nextcloud_reg_apps_old.stdout_lines | difference(nextcloud_reg_apps_new.stdout_lines) }}"
     when:
-      - nextcloud_register_apps_old.stdout_lines|d() and nextcloud_register_apps_new.stdout_lines|d()
+      - nextcloud_reg_apps_old.stdout_lines|d()
+      - nextcloud_reg_apps_new.stdout_lines|d()
       - nextcloud_upgrade_item|basename in nextcloud_apps
       - nextcloud_apps[nextcloud_upgrade_item|basename] != ""
   when: nextcloud_restore_apps

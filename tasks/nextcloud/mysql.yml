@@ -5,7 +5,7 @@
     name: "{{ nextcloud_mysql_db }}"
     state: present
   delegate_to: "{{ nextcloud_mysql_host_delegate }}"
-  register: nextcloud_register_database_status
+  register: nextcloud_reg_database_status
 
 - name: create Nextcloud MySQL database user
   mysql_user:
