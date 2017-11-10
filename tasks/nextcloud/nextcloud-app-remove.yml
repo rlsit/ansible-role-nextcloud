@@ -1,0 +1,16 @@
+---
+  
+- set_fact:
+    nextcloud_app_name: "{{ nextcloud_item.key }}"
+
+- name: disable Nextcloud app
+  command: php occ app:disable "{{ nextcloud_app_name }}"
+  args:
+    chdir: "{{ nextcloud_instance }}"
+  become: true
+  become_user: "{{ nextcloud_http_user }}"
+
+- name: Remove Nextcloud app dir
+  file:
+    path: "{{ nextcloud_instance }}/apps/{{ nextcloud_app_name }}"
+    state: absent
