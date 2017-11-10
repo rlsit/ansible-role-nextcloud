@@ -2,11 +2,6 @@
 
 # TODO: Add support for nextcloud_version='latest'
 
-- name: "Nextcloud facts: set instance installation directory"
-  set_fact:
-    nextcloud_webroot: "{{ vhost_item.nextcloud_webroot|d(nextcloud_webroot) }}"
-    nextcloud_data_dir: "{{ vhost_item.nextcloud_data_dir|d(nextcloud_data_dir) }}"
-
 - name: "Nextcloud facts: determine whether instance is already installed"
   stat:
     path: "{{ nextcloud_webroot }}/version.php"
@@ -36,6 +31,9 @@
   set_fact:
     nextcloud_reg_version: "{{ (nextcloud_reg_status_json.stdout|d())|from_json|json_query('[versionstring]')|join() if nextcloud_reg_status_json.stdout|d() else {} }}"
 
+- debug:
+    var: nextcloud_webroot
+
 - name: "Nextcloud facts: set nextcloud_webroot_old based on nextcloud_reg_version"
   set_fact:
     nextcloud_webroot_old: "{{ nextcloud_webroot.rsplit('/', 1)[-2] }}/nextcloud-{{ nextcloud_reg_version }}"
@@ -49,6 +47,17 @@
     path: "{{ nextcloud_symlink }}/config/config.php"
   register: nextcloud_reg_config
 
+- debug:
+    var: nextcloud_webroot
+
+- debug:
+    var: nextcloud_workdir
+
+- debug:
+    var: nextcloud_data_dir
+
+- debug:
+    var: nextcloud_symlink
 #- name: "Nextcloud facts: determine if instance is configured"
 #  stat:
 #    path: grep -q "{{ nextcloud_trusted_domains|first }}" {{ nextcloud_symlink }}/config/config.php
@@ -56,22 +65,22 @@
 #  changed_when: False
 #  register: nextcloud_reg_configured
 
-- name: "Nextcloud facts: determine whether data dir is in nextcloud_webroot"
-  set_fact:
-    nextcloud_data_dir_tmp: "{{
-      (nextcloud_dl_tmp_dir + '/nextcloud' + nextcloud_data_dir[(nextcloud_webroot|length()):])
-        if nextcloud_data_dir.startswith(nextcloud_webroot) else
-      (nextcloud_dl_tmp_dir + '/nextcloud' + nextcloud_data_dir[(nextcloud_symlink|length()):])
-        if nextcloud_data_dir.startswith(nextcloud_symlink) else
-      nextcloud_data_dir }}"
-
-- name: "Nextcloud facts: set ..._data_inside if data dir in nextcloud_webroot"
-  set_fact:
-    nextcloud_reg_data_inside: "{{ (nextcloud_data_dir == nextcloud_data_dir_tmp)|ternary('no', 'yes') }}"
+#- name: "Nextcloud facts: determine whether data dir is in nextcloud_webroot"
+#  set_fact:
+#    nextcloud_data_dir_tmp: "{{
+#      (nextcloud_dl_tmp_dir + '/nextcloud' + nextcloud_data_dir[(nextcloud_webroot|length()):])
+#        if nextcloud_data_dir.startswith(nextcloud_webroot) else
+#      (nextcloud_dl_tmp_dir + '/nextcloud' + nextcloud_data_dir[(nextcloud_symlink|length()):])
+#        if nextcloud_data_dir.startswith(nextcloud_symlink) else
+#      nextcloud_data_dir }}"
+#
+#- name: "Nextcloud facts: set ..._data_inside if data dir in nextcloud_webroot"
+#  set_fact:
+#    nextcloud_reg_data_inside: "{{ (nextcloud_data_dir == nextcloud_data_dir_tmp)|ternary('no', 'yes') }}"
 
 # TODO: Implement function to copy over data directory if it's inside
 #       nextcloud_webroot(_old)?. nextcloud-harden has everything in place,
 #       only nextcloud-upgrade is missing some logic. See TODO notes there.
 - fail:
     msg: "Error: Data directory ({{ nextcloud_data_dir }}) is inside nextcloud_webroot ({{ nextcloud_webroot }}). Not supported yet."
-  when: nextcloud_reg_data_inside
+  when: nextcloud_data_dir.startswith(nextcloud_webroot) or nextcloud_data_dir.startswith(nextcloud_symlink)
