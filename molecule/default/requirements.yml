@@ -1,0 +1,3 @@
+---
+- src: https://github.com/mejo-/ansible-role-mariadb.git
+  name: mejo-.mariadb
