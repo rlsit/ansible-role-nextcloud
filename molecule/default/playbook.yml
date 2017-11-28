@@ -2,6 +2,8 @@
 - name: Converge
   hosts: all
   roles:
+    - role: mejo-.mariadb
     - role: ansible-role-nextcloud
   vars:
     nextcloud_apache_php: False
+    nextcloud_mysql_password: topsecret
