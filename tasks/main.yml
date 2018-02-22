@@ -1,5 +1,24 @@
 ---
 
+#- name: test my new module
+#  become: true
+#  become_user: "{{ nextcloud_http_user }}"
+#  nextcloud_app:
+#    name: passman
+#    state: enabled
+#    nextcloud_path: /var/www/nextcloud/nextcloud-current
+#    validate_certs: no
+#  register: nc_app_circles
+#  environment:
+#    http_proxy: "http://proxy.steindlberger.de:3128/"
+#    https_proxy: "http://proxy.steindlberger.de:3128/"
+#
+#- debug:
+#    var: nc_app_circles
+#
+#- fail:
+#    msg: stop here
+
 - name: install Nextcloud dependencies
   apt:
     pkg: "{{ item }}"
