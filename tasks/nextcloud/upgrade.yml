@@ -24,14 +24,6 @@
     group: "{{ nextcloud_http_group }}"
     mode: 0640
 
-# TODO: copy over data directory from nextcloud_webroot_old if it was there
-# Problems: * data directory can be huge. copying it twice during upgrade
-#             should be avoided.
-#           * nextcloud_data_dir is wrong source. nextcloud_webroot_old/..?
-#- name: "Nextcloud upgrade: copy over data directory when inside nextcloud_webroot"
-#  command: cp -a {{ nextcloud_data_dir }}/. {{ nextcloud_data_dir_tmp }}/
-#  when: nextcloud_reg_data_inside
-
 - block:
   - name: "Nextcloud upgrade: register apps from old instance"
     command: find . -maxdepth 1 -mindepth 1 -type d

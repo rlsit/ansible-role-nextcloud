@@ -2,7 +2,7 @@
 
 - name: "Nextcloud configure: create data directory if missing"
   file:
-    path: "{{ nextcloud_data_dir_tmp }}"
+    path: "{{ nextcloud_data_dir }}"
     state: directory
     owner: "{{ nextcloud_http_user }}"
     group: "{{ nextcloud_http_group }}"

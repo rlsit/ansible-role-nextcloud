@@ -13,7 +13,7 @@
   loop_control:
     loop_var: nextcloud_harden_item
   with_items:
-    - "{{ nextcloud_data_dir_tmp }}"
+    - "{{ nextcloud_data_dir }}"
     - "{{ nextcloud_dl_tmp_dir }}/nextcloud/updater"
 
 - name: "Nextcloud harden: chmod+chown files and directories (rwXr-X---, root:<group>)"
@@ -40,7 +40,7 @@
   loop_control:
     loop_var: nextcloud_harden_item
   with_items:
-    - "{{ nextcloud_data_dir_tmp }}"
+    - "{{ nextcloud_data_dir }}"
     - "{{ nextcloud_dl_tmp_dir }}/nextcloud/apps"
     - "{{ nextcloud_dl_tmp_dir }}/nextcloud/config"
     - "{{ nextcloud_dl_tmp_dir }}/nextcloud/themes"
@@ -60,5 +60,5 @@
   loop_control:
     loop_var: nextcloud_harden_item
   with_items:
-    - "{{ nextcloud_data_dir_tmp }}/.htaccess"
+    - "{{ nextcloud_data_dir }}/.htaccess"
     - "{{ nextcloud_dl_tmp_dir }}/nextcloud/.htaccess"
