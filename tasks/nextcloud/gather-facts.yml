@@ -23,9 +23,12 @@
   when: not nextcloud_reg_do_install
 
 # Safety check: 'occ status' output not plain json if in maintenance mode
-- fail:
+- name: "Nextcloud facts: assert that Nextcloud not in maintenance mode"
+  assert:
+    that:
+      - not "Nextcloud is in maintenance mode" in nextcloud_reg_status_json.stdout|d()
+      - nextcloud_reg_status_json.rc|d(0) == 0
     msg: "Error: Nextcloud already in maintenance mode or other error"
-  when: ("Nextcloud is in maintenance mode" in nextcloud_reg_status_json.stdout|d()) or (nextcloud_reg_status_json.rc|d(0) != 0)
 
 - name: "Nextcloud facts: parse instance status if already installed"
   set_fact:
@@ -44,7 +47,9 @@
     path: "{{ nextcloud_symlink }}/config/config.php"
   register: nextcloud_reg_config
 
-- name: "Nextcloud facts: fail if data dir is in nextcloud_webroot"
-  fail:
+- name: "Nextcloud facts: assert that data dir is outside nextcloud_webroot"
+  assert:
+    that:
+      - not nextcloud_data_dir.startswith(nextcloud_webroot)
+      - not nextcloud_data_dir.startswith(nextcloud_symlink)
     msg: "Error: Data directory ({{ nextcloud_data_dir }}) is inside nextcloud_webroot ({{ nextcloud_webroot }}). Not supported."
-  when: nextcloud_data_dir.startswith(nextcloud_webroot) or nextcloud_data_dir.startswith(nextcloud_symlink)

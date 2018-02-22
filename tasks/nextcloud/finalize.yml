@@ -7,9 +7,11 @@
     mode: 0755
   register: nextcloud_instance_created
 
-- fail:
-    msg: "Error: Nextcloud instance webroot already exists: {{ nextcloud_instance }}"
-  when: not nextcloud_instance_created.changed
+- msg: "Nextcloud finalize: assert that Nextcloud instance webroot didn't exist"
+  assert:
+    that:
+      - nextcloud_instance_created.changed
+    msg: "Error: Nextcloud instance webroot already existed: {{ nextcloud_instance }}"
 
 - name: "Nextcloud finalize: move new Nextcloud to nextcloud_instance"
   command: "cp -a {{ nextcloud_dl_tmp_dir }}/nextcloud/. {{ nextcloud_instance }}/"
