@@ -9,11 +9,6 @@
     - role:nextcloud:install
     - role:nextcloud:upgrade
 
-- include: apache-php.yml
-  when: nextcloud_apache_php|d()
-  tags:
-    - role:nextcloud:apache
-
 - name: gather Nextcloud instance facts
   include: nextcloud/gather-facts.yml
   tags:
@@ -161,3 +156,8 @@
   tags:
     - role:nextcloud:install
     - role:nextcloud:upgrade
+
+- include: apache-php.yml
+  when: nextcloud_apache_php|d()
+  tags:
+    - role:nextcloud:apache

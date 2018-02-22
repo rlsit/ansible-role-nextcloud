@@ -3,7 +3,7 @@
 # Nextcloud version to install. Raise for upgrading.
 nextcloud_version: "12.0.3"
 
-# List of trusted domain names ('localhost' is added per default)
+# List of trusted domain names ('localhost' is always added)
 nextcloud_trusted_domains: []
 
 # Path to the Nextcloud workdir holding Nextcloud instances
@@ -19,6 +19,14 @@ nextcloud_data_dir: "/srv/nextcloud/data"
 
 # Configure the Apache2 php.ini automatically?
 nextcloud_apache_php: yes
+
+# Set custom PHP file size limits
+nextcloud_php_settings:
+  upload_max_filesize: "511M"
+  post_max_size: "511M"
+  memory_limit: "512M"
+  #max_input_time: 60
+  #max_execution_time: 60
 
 # Nextcloud system, MySQL and web user settings
 nextcloud_http_user: www-data
