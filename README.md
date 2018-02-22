@@ -7,23 +7,20 @@ systems.
 
 # How it works
 
-* The role installs the requested Nextcloud version into
+* The requested Nextcloud version is installed into
   `{{ nextcloud_work_dir }}/nextcloud-{{ nextcloud_version }}`.
-* A maintenance page (to be displayed during upgrades) is installed
+* The symlink `{{ nextcloud_work_dir }}/nextcloud-current` points to the
+  active Nextcloud installation (or maintenance page uring upgrades).
+* A simple maintenance page (to be displayed during upgrades) is installed
   to `{{ nextcloud_work_dir }}/nextcloud-maintenance`.
-* A symlink `{{ nextcloud_work_dir }}/nextcloud-current` is installed that
-  points to the current and active Nextcloud installation (or to the
-  maintenance page during the upgrade).
-* If a list variable `apache2_vhosts` is set, then the role loops over this
-  list and deploys nextcloud on each vhost.
 
 # Preliminaries
 
 The role takes care of installing and upgrading Nextcloud and its apps. It
-doesn't install or configure MariaDB/MySQL, mail or web service. This is
-done better in separate roles.
+doesn't install or configure MariaDB/MySQL, mail or web service. The latter
+has to be done seperately.
 
-Only PHP dependencies required for Nextcloud are installed by that role.
+PHP dependencies required for Nextcloud are installed by that role.
 
 Some modules used in this role are new to Ansible 2.2 and it's tested with
 Ansible 2.2, 2.3 and 2.4.
@@ -31,17 +28,17 @@ Ansible 2.2, 2.3 and 2.4.
 The following preliminaries need to be met:
 
 * Ansible 2.2 or newer
-* A MariaDB/MySQL server with admin permissions (may be remote)
-* A webserver (e.g. Apache2/Nginx) with basic PHP support (needs to be local
-  to the target system)
-* A mail server if you want the Nextcloud instance to send out mails (may be
-  remote)
+* Debian target system with the following requirements:
+  * MariaDB/MySQL server with admin permissions (may be remote)
+  * Webserver (e.g. Apache2/Nginx) with basic PHP support
+  * Mail server if Nextcloud instance shall send out mails (may be
+    remote)
 * The Nextcloud `data` directory needs to be located outside
   `nextcloud_work_dir`
 
 # Usage example
 
-* Integrate the role in your playbook:  
+* Integrate the role in your playbook: 
     
   ```
 - hosts: cloud.example.org
@@ -78,14 +75,12 @@ nextcloud_apps:
     
   `ansible-playbook site.yml -t nextcloud -l cloud.example.org --diff`
 
-* Configure the VirtualHost of your webserver. The following is an example snippet for
-  a jinja2 template:  
+* Configure the VirtualHost in your webserver. The following is an example
+  snippet for a jinja2 Apache2 vhost template:  
     
   ```
 {% set nextcloud_webroot = nextcloud_workdir|d() + '/nextcloud-current' %}
-{% if nextcloud_www_alias|d(true) %}
-Alias /{{ nextcloud_www_alias_name|d('nextcloud') }} {{ nextcloud_webroot }}
-{% endif %}
+	DocumentRoot {{ nextcloud_webroot }}
 	<Directory {{ nextcloud_webroot }}>
 		Options FollowSymlinks
 		AllowOverride All
@@ -105,4 +100,4 @@ This Ansible role is licensed under the GNU GPLv3 or later.
 
 # Author
 
-Copyright 2017 Jonas Meurer <jonas@freesources.org>
+Copyright 2017-2018 Jonas Meurer <jonas@freesources.org>
