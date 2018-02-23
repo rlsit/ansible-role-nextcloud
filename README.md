@@ -94,6 +94,11 @@ nextcloud_apps:
 	</Directory>
 ```
 
+# Upgrading Nextcloud
+
+To upgrade a Nextcloud instance, it's sufficient to bump the version
+in Role variable `nextcloud_version` and run the role again.
+
 # License
 
 This Ansible role is licensed under the GNU GPLv3 or later.
