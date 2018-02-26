@@ -3,8 +3,9 @@
 # (c) 2017-2018, Jonas Meurer <jonas@freesources.org>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-# ansible-playbook site.yml -l test1 -t nextcloud --diff
-#
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
 # TODO:
 # * properly set file attributes (module.set_fs_attributes_if_different)
 # * Deal with Apps that are not on apps.nextcloud.com
@@ -24,24 +25,22 @@ description:
     - This module manages the apps of a Nextcloud instance.
     - Supports to install/upgrade, enable/disable or query the status of
       Nextcloud apps.
-version_added: "2.4"
+version_added: "2.6"
 author:
     - Jonas Meurer (@mejo-)
 options:
     name:
         required: true
-        default: none
         description:
             - Name of the Nextcloud app
     nextcloud_path:
         required: true
-        default: none
+        default: None
         description:
             - Path to the Nextcloud installation
     state:
         required: true
         choices: [ "latest", "enabled", "disabled", "report" ]
-        default: none
         description:
             - Desired app state. C(latest) ensures that the latest (or in
               C(version) defined) version is installed and enabled. C(enabled)
@@ -51,27 +50,26 @@ options:
               untouched and just report the current state.
     version:
         required: false
-        default: none
         description:
             - Pin the app to a specific version.
     app_store_url:
         required: false
-        default: "https://apps.nextcloud.com/api/v1/platform/{}/apps.json"
+        default: "https://apps.nextcloud.com/api/v1/platform/{0}/apps.json"
         description:
-            - URL to the app store index in JSON format ({} will automatically
+            - URL to the app store index in JSON format ({0} will automatically
               be replaced by the detected Nextcloud platform).
     validate_certs:
         required: false
-        choices: ['yes', 'no']
-        default: yes
+        type: bool
+        default: "yes"
         description:
             - If C(False), SSL certificates will not be validated. This should
               only be used on personally controlled sites using self-signed
               certificates.
     keep_newer:
         required: false
-        choices: ['yes', 'no']
-        default: no
+        type: bool
+        default: "no"
         description:
             - Do not replace existing files that are newer than files
               from the archive.
@@ -108,34 +106,42 @@ EXAMPLES = r'''
 RETURN = r'''
 name:
     description: Name of the Nextcloud app
+    returned: success
     type: str
     sample: circles
 installed:
     description: Is the app installed locally?
+    returned: success
     type: boolean
     sample: True
 enabled:
     description: Is the app enabled?
+    returned: success
     type: boolean
     sample: True
 version_local:
     description: Locally installed version of the app
+    returned: success
     type: str
     sample: "0.13.4"
 path_local:
     description: Local path to the installed app
-    type: path
+    returned: success
+    type: string
     sample: "/var/www/nextcloud/apps/circles"
 version_remote:
     description: Latest/desired version of the app found in app store
+    returned: success
     type: str
     sample: "0.13.6"
 url_remote:
     description: URL to latest/desired version of the app from app store
+    returned: success
     type: str
     sample: "https://github.com/nextcloud/circles/releases/download/v0.13.6/circles-0.13.6.tar.gz"
 platform:
     description: Nextcloud platform version
+    returned: success
     type: str
     sample: "12.0.2"
 '''
@@ -164,18 +170,19 @@ else:
 # saving to a tempfile (64k)
 BUFSIZE = 65536
 
+
 def occ_command(module, occ_path, occ_command, occ_options='', occ_json=True):
     php_path = module.get_bin_path("php", True, ["/usr/local/bin"])
-    cmd = [php_path, occ_path, '--no-interaction', '--no-warnings',
-            occ_command]
+    cmd = [php_path, occ_path, '--no-interaction', '--no-warnings', occ_command]
     if occ_json:
         cmd.append('--output=json')
     if occ_options:
         cmd.append(occ_options)
     rc, out, err = module.run_command(cmd)
     if rc != 0:
-        module.fail_json(msg='occ command {} failed: {}'.format(cmd, err))
+        module.fail_json(msg='occ command {0} failed: {1}'.format(cmd, err))
     return out
+
 
 def app_store_fetch_json(module, url):
     dest = "/tmp/ansible-nextcloud_app-apps.json"
@@ -199,14 +206,12 @@ def app_store_fetch_json(module, url):
         try:
             content = fd.read()
         except Exception as e:
-            module.fail_json(msg="failed to read from file: {}".format(
-                    to_native(e)))
+            module.fail_json(msg="failed to read from file: {0}".format(to_native(e)))
     else:
         resp, info = fetch_url(module, url, method='GET')
 
         if info['status'] != 200:
-            module.fail_json(msg="Failed to fetch url {}: {}".format(url,
-                    info['msg']))
+            module.fail_json(msg="Failed to fetch url {0}: {1}".format(url, info['msg']))
 
         try:
             content = resp.read()
@@ -220,17 +225,16 @@ def app_store_fetch_json(module, url):
                 fd.write(content)
             except Exception as e:
                 os.remove(dest)
-                module.fail_json(msg="Failed to write to file: {}".format(
-                        to_native(e)))
+                module.fail_json(msg="Failed to write to file: {0}".format(to_native(e)))
             fd.close()
 
     try:
         store_json = module.from_json(content.decode('utf8'))
     except ValueError:
-        module.fail_json(msg="Failed to parse URL {} content: {}".format(
-                url, content))
+        module.fail_json(msg="Failed to parse URL {0} content: {1}".format(url, content))
 
     return store_json
+
 
 def app_state_store(module, app_store_url, app_version_local=''):
     store_json = app_store_fetch_json(module, app_store_url)
@@ -252,9 +256,9 @@ def app_state_store(module, app_store_url, app_version_local=''):
     if app_version_store == '0.0.0':
         app_version_store = ''
     elif app_version_local and app_version_local != app_version_store:
-        module.fail_json(msg='Version {} of app {} not found'.format(
-                app_version_local, module.params['name']))
+        module.fail_json(msg='Version {0} of app {1} not found'.format(app_version_local, module.params['name']))
     return (app_version_store, app_url_store)
+
 
 def app_state_local(module, occ_path, app_name):
     out = occ_command(module, occ_path, 'app:list')
@@ -280,6 +284,7 @@ def app_state_local(module, occ_path, app_name):
 
     return (app_installed, app_enabled, app_version_local, app_path_local)
 
+
 def app_fetch(module, app_url):
     # Download the app tar.gz to a a temporary file
     fd, app_tmp = tempfile.mkstemp(suffix=".tar.gz", prefix="ansible-")
@@ -300,21 +305,20 @@ def app_fetch(module, app_url):
             os.write(fd, data)
         os.close(fd)
     except Exception as e:
-        module.fail_json(msg="Failure downloading {}, {}".format(app_url,
-                to_native(e)))
+        module.fail_json(msg="Failure downloading {0}, {1}".format(app_url, to_native(e)))
 
     if not os.access(app_tmp, os.R_OK):
-        module.fail_json(msg="Source '{}' not readable".format(app_tmp))
+        module.fail_json(msg="Source '{0}' not readable".format(app_tmp))
 
     # skip working with 0 size archives
     try:
         if os.path.getsize(app_tmp) == 0:
-            module.fail_json(msg="Invalid archive '{}', the file is 0 bytes".format(app_tmp))
+            module.fail_json(msg="Invalid archive '{0}', the file is 0 bytes".format(app_tmp))
     except Exception as e:
-        module.fail_json(msg="Source '{}' not readable, {}".format(app_tmp,
-                to_native(e)))
+        module.fail_json(msg="Source '{0}' not readable, {1}".format(app_tmp, to_native(e)))
 
     return app_tmp
+
 
 def app_unarchive(module, app_archive, apps_dir, file_args):
     tar_path = module.get_bin_path('gtar', None)
@@ -330,24 +334,21 @@ def app_unarchive(module, app_archive, apps_dir, file_args):
         cmd.append('--keep-newer-files')
 
     cmd.extend(['--extract', '-f', app_archive])
-    
-    rc, out, err = module.run_command(cmd, cwd=apps_dir, environ_update=dict(
-            LANG='C', LC_ALL='C', LC_MESSAGES='C'))
+
+    rc, out, err = module.run_command(cmd, cwd=apps_dir, environ_update=dict(LANG='C', LC_ALL='C', LC_MESSAGES='C'))
     if rc != 0:
-        module.fail_json(msg="failed to unpack {} to {}".format(app_archive,
-                apps_dir))
+        module.fail_json(msg="failed to unpack {0} to {1}".format(app_archive, apps_dir))
     return out
+
 
 def main():
     # define the available arguments/parameters
     module_args = dict(
         name=dict(type='str', required=True),
-        state=dict(type='str', choices=["enabled", "latest", "disabled",
-                "report"], required=True),
+        state=dict(type='str', choices=["enabled", "latest", "disabled", "report"], required=True),
         nextcloud_path=dict(type='path', required=True),
-        app_store_url=dict(type='str', required=False,
-                default="https://apps.nextcloud.com/api/v1/platform/{}/apps.json"),
-        version=dict(type='str', required=False, default=""),
+        app_store_url=dict(type='str', required=False, default="https://apps.nextcloud.com/api/v1/platform/{0}/apps.json"),
+        version=dict(type='str', required=False, default=None),
         validate_certs=dict(type='bool', default=True),
         keep_newer=dict(type='bool', default=False),
     )
@@ -381,11 +382,10 @@ def main():
 
     # requires Python module 'semantic_version'
     if not semantic_version_found:
-        module.fail_json(msg='The python semantic-version library is required'
-                **result)
+        module.fail_json(msg='The python semantic-version library is required', **result)
 
     # requires occ script in Nextcloud path
-    occ_path = os.path.join (module.params['nextcloud_path'], 'occ')
+    occ_path = os.path.join(module.params['nextcloud_path'], 'occ')
     if not os.path.isfile(occ_path):
         module.fail_json(msg='No occ found in nextcloud_path', **result)
 
@@ -394,18 +394,16 @@ def main():
     result['platform'] = module.from_json(out)['versionstring']
 
     # read in local Nextcloud apps
-    (result['installed'], result['enabled'], result['version_local'],
-            result['path_local']) = app_state_local(module, occ_path, app_name)
+    (result['installed'], result['enabled'], result['version_local'], result['path_local']) = app_state_local(module, occ_path, app_name)
 
     # get version and URL from app store
-    (result['version_remote'], result['url_remote']) = app_state_store(
-            module, module.params['app_store_url'].format(
-                result['platform']), module.params['version'])
+    (result['version_remote'], result['url_remote']) = app_state_store(module, module.params['app_store_url'].format(result['platform']),
+                                                                       module.params['version'])
 
     if (((module.params['state'] == 'latest' and
             result['version_local'] != result['version_remote']) or
-            (module.params['state'] == 'enabled' and
-                    not result['installed'])) and result['url_remote']):
+            (module.params['state'] == 'enabled' and not result['installed'])) and
+            result['url_remote']):
         # INSTALL/UPDATE
         apps_dir = os.path.join(module.params['nextcloud_path'], 'apps')
         app_archive = app_fetch(module, result['url_remote'])
@@ -416,20 +414,17 @@ def main():
         # temporarly disable the app
         if result['enabled']:
             if not module.check_mode:
-                out = occ_command(module, occ_path, 'app:disable', app_name,
-                        False)
+                out = occ_command(module, occ_path, 'app:disable', app_name, False)
             result['enabled'] = False
             result['changed'] = True
 
         # install/upgrade the app
         if not module.check_mode:
-            out = app_unarchive(module, app_archive, apps_dir,
-                    file_args)
+            out = app_unarchive(module, app_archive, apps_dir, file_args)
         result['installed'] = True
         result['version_local'] = module.params['version']
         result['changed'] = True
-        diff_after = diff_after + '- installed app {} version {}\n'.format(
-                app_name, result['version_local'])
+        diff_after = diff_after + '- installed app {0} version {1}\n'.format(app_name, result['version_local'])
 
         os.unlink(app_archive)
 
@@ -440,7 +435,7 @@ def main():
             out = occ_command(module, occ_path, 'app:enable', app_name, False)
         result['enabled'] = True
         result['changed'] = True
-        diff_after = diff_after + '- enabled app {}\n'.format(app_name)
+        diff_after = diff_after + '- enabled app {0}\n'.format(app_name)
 
     elif (module.params['state'] == 'disabled' and result['enabled']):
         # DISABLE
@@ -449,7 +444,7 @@ def main():
         result['enabled'] = False
         result['version_local'] = ''
         result['changed'] = True
-        diff_after = diff_after + '- disabled app {}\n'.format(app_name)
+        diff_after = diff_after + '- disabled app {0}\n'.format(app_name)
 
     result['diff']['after'] = diff_after
     module.exit_json(**result)

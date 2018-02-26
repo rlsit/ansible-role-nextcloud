@@ -16,7 +16,7 @@ In the meantime, you can find the module in this branch at
 `modules/nextcloud_app.py'. To use it, copy it to the local directory
 '~/.ansible/plugins/modules/' on your Ansible host.
 
-[1] https://github.com/ansible/ansible/pull/36741
+[1] https://github.com/ansible/ansible/pull/36744
 
 # How it works
 
