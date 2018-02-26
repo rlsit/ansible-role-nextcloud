@@ -24,37 +24,6 @@
     group: "{{ nextcloud_http_group }}"
     mode: 0640
 
-- block:
-  - name: "Nextcloud upgrade: register apps from old instance"
-    command: find . -maxdepth 1 -mindepth 1 -type d
-    args:
-      chdir: "{{ nextcloud_webroot_old }}/apps"
-    changed_when: false
-    register: nextcloud_reg_apps_old
-  - name: "Nextcloud upgrade: register apps from new instance"
-    command: find . -maxdepth 1 -mindepth 1 -type d
-    args:
-      chdir: "{{ nextcloud_dl_tmp_dir }}/nextcloud/apps"
-    changed_when: false
-    register: nextcloud_reg_apps_new
-  # * Copy over apps from the old Nextcloud instance that are missing in
-  #   the new instance and are listed with external install path in
-  #   'nextcloud_apps'
-  - name: "Nextcloud upgrade: copy missing apps from old to new instance"
-    command: >
-      cp -a
-      {{ nextcloud_webroot_old }}/apps/{{ nextcloud_upgrade_item }}
-      {{ nextcloud_dl_tmp_dir }}/nextcloud/apps/
-    loop_control:
-      loop_var: nextcloud_upgrade_item
-    with_items: "{{ nextcloud_reg_apps_old.stdout_lines | difference(nextcloud_reg_apps_new.stdout_lines) }}"
-    when:
-      - nextcloud_reg_apps_old.stdout_lines|d()
-      - nextcloud_reg_apps_new.stdout_lines|d()
-      - nextcloud_upgrade_item|basename in nextcloud_apps
-      - nextcloud_apps[nextcloud_upgrade_item|basename] != ""
-  when: nextcloud_restore_apps
-
 - name: "Nextcloud upgrade: upgrade via occ commandline"
   become: true
   become_user: "{{ nextcloud_http_user }}"

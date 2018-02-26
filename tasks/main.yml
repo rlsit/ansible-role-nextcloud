@@ -73,47 +73,16 @@
     - role:nextcloud:install
     - role:nextcloud:upgrade
 
-- block:
-  - name: register available Nextcloud apps
-    become: true
-    become_user: "{{ nextcloud_http_user }}"
-    command: php occ app:list --output=json_pretty --no-warnings
-    args:
-      chdir: "{{ nextcloud_instance }}"
-    changed_when: false
-    check_mode: no
-    register: nextcloud_reg_app_list
-
-  - name: convert Nextcloud app list to yaml
-    set_fact:
-      nextcloud_reg_apps_installed: "{{ nextcloud_reg_app_list.stdout | from_json }}"
-
-  - name: Remove old Nextcloud app version
-    include: nextcloud/app-remove.yml
-    when:
-      - nextcloud_item.value.version|d()
-      - nextcloud_reg_apps_installed['enabled'][nextcloud_item.key]|d()
-      - nextcloud_item.value.version | version_compare( nextcloud_reg_apps_installed['enabled'][nextcloud_item.key] , '!=' )
-    loop_control:
-      loop_var: nextcloud_item
-    with_dict: "{{ nextcloud_apps }}"
-    tags:
-      - role:nextcloud:apps
-
-  # * Install all apps from 'nextcloud_apps' that have an install path set
-  #   and are not enabled yet
-  # * Enable all remaining apps from 'nextcloud_apps' that are disabled but
-  #   available locally
-  - name: install/enable Nextcloud apps
-    include: nextcloud/apps.yml
-    when:
-      - nextcloud_item.key not in nextcloud_reg_apps_installed.enabled
-      - nextcloud_item.value.source|d() != "" or
-          nextcloud_item.key in nextcloud_reg_apps_installed.disabled
-    loop_control:
-      loop_var: nextcloud_item
-    with_dict: "{{ nextcloud_apps }}"
-  when: nextcloud_apps|d() is mapping
+- name: install/enable Nextcloud apps
+  become: true
+  become_user: "{{ nextcloud_http_user }}"
+  nextcloud_app:
+    name: "{{ nextcloud_item }}"
+    nextcloud_path: "{{ nextcloud_instance }}"
+    state: "{{ nextcloud_apps_upgrade|ternary('latest', 'enabled') }}"
+  loop_control:
+    loop_var: nextcloud_item
+  with_items: "{{ nextcloud_apps }}"
   tags:
     - role:nextcloud:install
     - role:nextcloud:upgrade
@@ -122,15 +91,15 @@
 - name: disable Nextcloud apps
   become: true
   become_user: "{{ nextcloud_http_user }}"
-  command: php occ app:disable "{{ nextcloud_item }}"
-  args:
-    chdir: "{{ nextcloud_instance }}"
+  nextcloud_app:
+    name: "{{ nextcloud_item }}"
+    nextcloud_path: "{{ nextcloud_instance }}"
+    state: disabled
   loop_control:
     loop_var: nextcloud_item
   with_items: "{{ nextcloud_apps_disabled }}"
   when:
     - nextcloud_apps_disabled|d()
-    - nextcloud_item not in nextcloud_reg_apps_installed.disabled
   tags:
     - role:nextcloud:install
     - role:nextcloud:upgrade

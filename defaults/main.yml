@@ -44,31 +44,14 @@ nextcloud_admin_user: admin
 nextcloud_www_alias: yes
 nextcloud_www_alias_name: "nextcloud"
 
-# List of Nextcloud Apps to install
-#
-# A dict with app names as keys and another dict of settings as values
-# * for internal apps the dict can be empty ("")
-# * for external apps the dict supports keys 'source', 'version' and 'conf'
-#   * 'source': the app will be downloaded from this URL
-#   * 'version': optional pinning of the app, enables app upgrades via Ansible
-#   * 'conf': optional dict with app configuration settings
-#
-# nextcloud_apps:
-#   app_internal: ""
-#   app_external:
-#     source: "https://example.org/path/to/app_external.tar.gz"
-#     version: "1.2.3"
-#     conf:
-#       setting1: value1
-#       setting2: value2
-#
-nextcloud_apps: {}
+# List of Nextcloud Apps to install/enable
+nextcloud_apps: []
 
 # List of Nextcloud Apps to disable.
 nextcloud_apps_disable: []
 
-# Restore all enabled Apps after upgrade?
-nextcloud_restore_apps: yes
+# Upgrade nextcloud Apps?
+nextcloud_apps_upgrade: False
 
 # How to install Nextcloud (supported: 'git' or 'tar')
 nextcloud_src_type: "git"

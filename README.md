@@ -5,6 +5,19 @@
 This role is meant to deploy and upgrade Nextcloud instances to Debian
 systems.
 
+# Using the Ansible module `nextcloud_app`
+
+This branch uses my new Ansible module `nextcloud_app` for managing
+Nextcloud apps.
+
+I opened a pull request[1] to include the moule into Ansible.
+
+In the meantime, you can find the module in this branch at
+`modules/nextcloud_app.py'. To use it, copy it to the local directory
+'~/.ansible/plugins/modules/' on your Ansible host.
+
+[1] https://github.com/ansible/ansible/pull/36741
+
 # How it works
 
 * The requested Nextcloud version is installed into
@@ -63,12 +76,9 @@ nextcloud_mysql_password: "******"
 nextcloud_admin_password: "******"
 
 nextcloud_apps:
-  admin_audit: ""
-  calendar:
-    source: https://github.com/nextcloud/calendar/releases/download/v1.5.6/calendar.tar.gz
-    version: 1.5.6
-  contacts:
-    source: https://github.com/nextcloud/contacts/releases/download/v2.0.1/contacts.tar.gz
+  - admin_audit
+  - calendar
+  - contacts
 ```
 
 * Deploy Nextcloud to the target system:  
