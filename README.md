@@ -13,8 +13,7 @@ Nextcloud apps.
 I opened a pull request[1] to include the moule into Ansible.
 
 In the meantime, you can find the module in this branch at
-`modules/nextcloud_app.py'. To use it, copy it to the local directory
-'~/.ansible/plugins/modules/' on your Ansible host.
+`library/nextcloud_app.py'. Ansible should find the module automatically.
 
 [1] https://github.com/ansible/ansible/pull/36744
 
