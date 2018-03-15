@@ -70,6 +70,7 @@ nextcloud_backup_dir: "/var/backups/nextcloud"
 nextcloud_dependencies_general:
   - php-pear
   - python-mysqldb
+  - python-semantic-version
   - "{{ 'git' if nextcloud_src_type == 'git' else 'bzip2' }}"
 nextcloud_dependencies_jessie:
   - php5-apcu
