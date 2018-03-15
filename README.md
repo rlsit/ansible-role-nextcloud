@@ -12,8 +12,9 @@ Nextcloud apps.
 
 I opened a pull request[1] to include the moule into Ansible.
 
-In the meantime, you can find the module in this branch at
-`library/nextcloud_app.py'. Ansible should find the module automatically.
+In the meantime, you can find the module shipped with this role at
+[`library/nextcloud_app.py`](https://gitlab.com/mejo-/ansible-role-nextcloud/blob/master/library/nextcloud_app.py).
+Ansible should find the module automatically.
 
 [1] https://github.com/ansible/ansible/pull/36744
 
