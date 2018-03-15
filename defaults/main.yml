@@ -70,7 +70,7 @@ nextcloud_backup_dir: "/var/backups/nextcloud"
 nextcloud_dependencies_general:
   - "{{ 'git' if nextcloud_src_type == 'git' else 'bzip2' }}"
   - php-pear
-nextcloud_dependencies_jessie:
+nextcloud_dependencies_php_jessie:
   - php5-apcu
   - php5-curl
   - php5-gd
