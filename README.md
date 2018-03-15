@@ -7,7 +7,7 @@ systems.
 
 # Using the Ansible module `nextcloud_app`
 
-This branch uses my new Ansible module `nextcloud_app` for managing
+This role uses my new Ansible module `nextcloud_app` for managing
 Nextcloud apps.
 
 I opened a pull request[1] to include the moule into Ansible.
