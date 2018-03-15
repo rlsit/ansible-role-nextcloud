@@ -68,10 +68,8 @@ nextcloud_backup_dir: "/var/backups/nextcloud"
 
 # Dependencies (Debian packages) to install
 nextcloud_dependencies_general:
-  - php-pear
-  - python-mysqldb
-  - python-semantic-version
   - "{{ 'git' if nextcloud_src_type == 'git' else 'bzip2' }}"
+  - php-pear
 nextcloud_dependencies_jessie:
   - php5-apcu
   - php5-curl
@@ -84,8 +82,9 @@ nextcloud_dependencies_jessie:
   - php5-ldap
   - php5-mcrypt
   - php5-mysql
-nextcloud_dependencies_post_jessie:
+nextcloud_dependencies_php_post_jessie:
   - php-apcu
+  - php-bz2
   - php-curl
   - php-gd
   - php-gmp
@@ -94,11 +93,13 @@ nextcloud_dependencies_post_jessie:
   - php-intl
   - php-json
   - php-ldap
+  - php-mbstring
   - php-mcrypt
   - php-mysql
-  - php-bz2
-  - php-mbstring
   - php-smbclient
   - php-xml
   - php-zip
-nextcloud_dependencies: "{{ nextcloud_dependencies_general + (nextcloud_dependencies_jessie if ansible_distribution_major_version|int <= 8 else nextcloud_dependencies_post_jessie) }}"
+nextcloud_dependencies: "{{ nextcloud_dependencies_general + (nextcloud_dependencies_php_jessie if ansible_distribution_major_version|int <= 8 else nextcloud_dependencies_php_post_jessie) }}"
+nextcloud_dependencies_python:
+  - python-mysqldb
+  - python-semantic-version
