@@ -48,7 +48,7 @@ nextcloud_www_alias_name: "nextcloud"
 nextcloud_apps: []
 
 # List of Nextcloud Apps to disable.
-nextcloud_apps_disable: []
+nextcloud_apps_disabled: []
 
 # Upgrade nextcloud Apps?
 nextcloud_apps_upgrade: False
