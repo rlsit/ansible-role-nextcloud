@@ -1,7 +1,7 @@
 ---
 
 # Nextcloud version to install. Raise for upgrading.
-nextcloud_version: "12.0.3"
+nextcloud_version: "15.0.7"
 
 # List of trusted domain names ('localhost' is always added)
 nextcloud_trusted_domains: []
