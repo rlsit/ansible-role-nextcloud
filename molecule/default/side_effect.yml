@@ -1,12 +1,11 @@
 ---
-- name: Converge
+
+- name: SideEffect
   hosts: all
   roles:
-    - role: mejo-.mariadb
     - role: ansible-role-nextcloud
   vars:
     nextcloud_apache_php: False
     nextcloud_admin_password: topsecret
     nextcloud_mysql_password: topsecret
-    nextcloud_version: 15.0.6
 

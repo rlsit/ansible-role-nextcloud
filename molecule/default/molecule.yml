@@ -15,6 +15,7 @@ platforms:
     command: /lib/systemd/systemd
 provisioner:
   name: ansible
+  side_effect: side_effect.yml
   options:
     skip-tags: molecule_test_skip
   lint:
