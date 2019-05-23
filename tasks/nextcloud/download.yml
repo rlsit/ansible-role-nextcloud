@@ -6,7 +6,7 @@
     state: directory
 
 - block:
-  - name: "Nextcloud download: clone version branch from git repo"
+  - name: "Nextcloud download: clone version branch from git repo {{ nextcloud_version }}"
     git:
       repo: "{{ nextcloud_repo }}"
       dest: "{{ nextcloud_dl_tmp_dir }}/nextcloud"
@@ -23,7 +23,7 @@
 #      - index-test.php
 #      - installer
 #    when: nextcloud_src_type == "git"
-  - name: "Nextcloud download: fetch and unpack version tarball"
+  - name: "Nextcloud download: fetch and unpack version tarball {{ nextcloud_version }}"
     unarchive:
       src: "{{ nextcloud_tar_url }}"
       dest: "{{ nextcloud_dl_tmp_dir }}"
