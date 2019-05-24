@@ -1,6 +1,6 @@
 # Ansible role to install and maintain Nextcloud setups
 
-[![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-nextcloud-blue.svg)](https://galaxy.ansible.com/mejo-/nextcloud/) [![Build Status](https://travis-ci.org/rlsit/ansible-role-nextcloud.svg?branch=master)](https://travis-ci.org/rlsit/ansible-role-nextcloud)
+[![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-nextcloud-blue.svg)](https://galaxy.ansible.com/mejo-/nextcloud/) [![Build Status](https://travis-ci.org/rlsit/mejo-ansible-role-nextcloud.svg?branch=master)](https://travis-ci.org/rlsit/mejo-ansible-role-nextcloud)
 
 This role is meant to deploy and upgrade Nextcloud instances to Debian
 systems.
